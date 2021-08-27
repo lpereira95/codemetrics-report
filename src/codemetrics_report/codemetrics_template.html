@@ -1,0 +1,116 @@
+<head>
+  <title>Code analysis: {{project_name}}</title>
+</head>
+
+
+<h1> Code analysis: {{project_name}} </h1>
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega@5"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega-lite@4.8.1"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega-embed@6"></script>
+<style>
+    .error {
+        color: red;
+    }
+    #vg-tooltip-element * {
+        all: revert;
+    }
+    div[data-chart] {
+        overflow-y: hidden;
+    }
+</style>
+
+
+<h2>Lines of code</h2>
+
+<p> Shows an overview of the project in terms of coding languages and number of lines.<lines. /p>
+
+
+<div data-chart="loc"></div>
+
+
+<h2>Age</h2>
+
+<p> Shows the development activity in a given period (note most recent activity occurs at the left) </p>
+
+<div data-chart="age" data-type="composed" data-width="70%"></div>
+
+
+<h2>Lines of code and file age</h2>
+
+<p> Shows the number of lines of code (circle size) and age (color) of each file. </p>
+
+<div data-chart="loc_age" data-width="50%"></div>
+
+
+
+<h2> Hotspots </h2>
+
+<p> Shows the complexity (circle size) and number of changes (color) of each file. </p>
+
+<div data-chart="hotspots" data-width="50%"></div>
+
+
+
+
+
+<script>
+let charts = {};
+charts["loc"] = {{loc}}
+charts["age"] = {{age}}
+charts["loc_age"] = {{loc_age}}
+charts["hotspots"] = {{hotspots}}
+</script>
+<script>
+    function showError(el, error) {
+        el.innerHTML = ('<div class="error" style="color:red;">'
+        + '<p>JavaScript Error: '+error.message+'</p>'
+        + "<p>This usually means there's a typo in your chart specification. "
+        + "See the javascript console for the full traceback.</p>"
+        + '</div>');
+        throw error;
+    }
+
+    function autoChart(spec, wrapper) {
+        const subWrapper = document.createElement("div");
+        wrapper.appendChild(subWrapper);
+        subWrapper.style.width = wrapper.dataset.width || "80%";
+
+        spec.autosize = {"type": "fit", "resize": true};
+        const vegaChart = {
+            ratio: spec.width / spec.height,
+            wrapperElem: wrapper,
+            subWrapperElem: subWrapper,
+            composed: wrapper.dataset.type === "composed",
+        };
+        const embedOpt = {
+            "renderer": "svg",
+            "actions": false,
+        };
+        vegaEmbed(subWrapper, spec, embedOpt).then(result => {
+            const bindings = wrapper.querySelector("form");
+            const container = wrapper.querySelector("svg.marks");
+            const chart = wrapper.querySelector("svg.marks > g > g > g > g");
+            wrapper.parentNode.insertBefore(bindings, wrapper.nextSibling);
+            vegaChart.view = result.view;
+            vegaChart.resize = () => {
+                const width = vegaChart.subWrapperElem.offsetWidth;
+                vegaChart.view
+                .width(width)
+                .height(width / vegaChart.ratio)
+                .run()
+                if (vegaChart.composed) {
+                    vegaChart.wrapperElem.style.height = Math.ceil(chart.getBoundingClientRect().height) + 10 + "px";
+                }
+            };
+            window.addEventListener('resize', vegaChart.resize);
+            window.dispatchEvent(new Event('resize'));
+        }).catch(error => showError(wrapper, error));
+    }
+
+    charts_wrappers = document.querySelectorAll("div[data-chart]");
+    for (let i = 0 ; i < charts_wrappers.length ; i++) {
+        autoChart(charts[charts_wrappers[i].dataset.chart], charts_wrappers[i]);
+    }
+</script>
