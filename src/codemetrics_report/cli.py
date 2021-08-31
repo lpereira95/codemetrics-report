@@ -10,6 +10,7 @@ from codemetrics_report.vis import create_loc_chart
 from codemetrics_report.vis import create_age_chart
 from codemetrics_report.vis import create_age_loc_chart
 from codemetrics_report.vis import create_hotspots_chart
+from codemetrics_report.vis import create_coupling_chart
 
 
 @click.command()
@@ -23,14 +24,15 @@ def generate_codemetrics_report(repo_path, weeks):
     repo = cm.GitProject(repo_path)
 
     # get info
-    loc, ages, hotspots = gather_report_info(repo)
+    log, loc, ages, hotspots = gather_report_info(repo)
 
     # create charts
     charts_json = {
         'loc': altair2json(create_loc_chart(loc)),
         'age': altair2json(create_age_chart(ages, weeks=weeks)),
         'loc_age': create_age_loc_chart(ages),
-        'hotspots': create_hotspots_chart(hotspots)
+        'hotspots': create_hotspots_chart(hotspots),
+        'coupling': create_coupling_chart(loc, log)
     }
 
     filename = f'codemetrics_{project_name}.html'

@@ -26,7 +26,6 @@
 
 <p> Shows an overview of the project in terms of coding languages and number of lines.<lines. /p>
 
-
 <div data-chart="loc"></div>
 
 
@@ -44,7 +43,6 @@
 <div data-chart="loc_age" data-width="50%"></div>
 
 
-
 <h2> Hotspots </h2>
 
 <p> Shows the complexity (circle size) and number of changes (color) of each file. </p>
@@ -52,7 +50,11 @@
 <div data-chart="hotspots" data-width="50%"></div>
 
 
+<h2> Coupling </h2>
 
+<p> Shows the coupling between files. </p>
+
+<div data-chart="coupling" data-width="50%"></div>
 
 
 <script>
@@ -61,6 +63,7 @@ charts["loc"] = {{loc}}
 charts["age"] = {{age}}
 charts["loc_age"] = {{loc_age}}
 charts["hotspots"] = {{hotspots}}
+charts["coupling"] = {{coupling}}
 </script>
 <script>
     function showError(el, error) {

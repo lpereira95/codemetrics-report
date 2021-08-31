@@ -6,6 +6,7 @@ import datetime as dt
 import codemetrics as cm
 from tqdm import tqdm
 import pandas as pd
+from .filter import exclude_file_types
 
 
 def gather_report_info(repo, after=None):
@@ -25,6 +26,12 @@ def gather_report_info(repo, after=None):
     # ages
     ages = cm.get_ages(log).merge(loc)
 
+    log = exclude_file_types(log)
+
+    def compute_complexity(*args, **kwargs):
+        #print(args, kwargs)
+        return cm.get_complexity(*args, **kwargs)
+
     # complexity
     tqdm.pandas(desc="computing complexity")
     complexity = (log[['path', 'date']]
@@ -32,7 +39,7 @@ def gather_report_info(repo, after=None):
                   .max()
                   .merge(log[['path', 'date', 'revision']])
                   .groupby(['revision', 'path'])
-                  .progress_apply(cm.get_complexity, project=repo))
+                  .progress_apply(compute_complexity, project=repo))
     path_complexity = (complexity
                        .reset_index()[['path', 'cyclomatic_complexity', 'token_count']]
                        .groupby('path').quantile(0.8)
@@ -43,7 +50,7 @@ def gather_report_info(repo, after=None):
     loc_cc = pd.merge(loc, path_complexity)
     hotspots = cm.get_hot_spots(log, loc_cc)
 
-    return loc, ages, hotspots
+    return log, loc, ages, hotspots
 
 
 def create_html_report(project_name, charts_json,
@@ -51,7 +58,7 @@ def create_html_report(project_name, charts_json,
     """
     Args:
         charts_json (dict): JSON data.
-            Must contain: 'loc', 'age', 'loc_age', 'hotspots'.
+            Must contain: 'loc', 'age', 'loc_age', 'hotspots', 'coupling'.
     """
 
     # read template

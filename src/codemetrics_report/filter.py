@@ -4,7 +4,8 @@ import numpy as np
 IGNORE_PATHS = ('.', 'docs', 'doc', 'tests', 'test', 'notebooks')
 IGNORE_LANGS = ('reStructuredText', 'Markdown', 'make')
 IGNORE_EXTS = ('geo', 'xmf', 'xdmf', 'h5', 'hdf5', 'xml', 'json',
-               'yml', 'yaml', 'csv', 'svg', 'png')
+               'yml', 'yaml', 'csv', 'svg', 'png', 'gz', 'tgz',
+               'tar', 'zip')
 
 
 def exclude_paths(df, ignore_paths=IGNORE_PATHS, col_name='path'):

@@ -1,6 +1,8 @@
 import altair as alt
 from codemetrics.vega import vis_ages
 from codemetrics.vega import vis_hot_spots
+from codemetrics import get_co_changes
+from .graph import make_graph
 
 
 def create_loc_chart(loc_df):
@@ -55,3 +57,11 @@ def create_hotspots_chart(hspots, width=500, height=500,
     """
     return vis_hot_spots(hspots, width=width, height=height,
                          size_column=size_column, **kwargs)
+
+
+def create_coupling_chart(loc_df, log_df, coupling=0.8, cochanges=5, width=500, height=500):
+    co_changes = get_co_changes(log_df, by='path').\
+        query(f"(coupling > {coupling}) & (cochanges > {cochanges})").\
+        sort_values(by=['changes', 'cochanges'], ascending=False)
+
+    return make_graph(loc_df, co_changes, width=width, height=height)
